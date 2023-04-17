@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model CrawlerConfig {
+  id          Int       @id @default(autoincrement())
+  key         String    @db.VarChar(100)
+  order       Int       @default(0)
+  stringValue String    @default("") @db.VarChar(1000)
+  numberValue Int       @default(0)
+  isMulti     Boolean   @default(true)
+  instanceId  String?
+  lastPing    DateTime? @default(now())
+
+  @@unique([key, order], name: "key_order_unique")
+  @@index(key)
+  @@index([key, instanceId])
+  @@map("crawler_configs")
+}
+model User {
+  id                 Int    @id @default(autoincrement())
+  address            String @unique @db.VarChar(100)
+  status             Int    @default(0)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @default(now()) @updatedAt
+  tokens             TokenOfUser[]
+  userNfts           UserNft[]
+
+  @@map("users")
+}
+
+model UserNft {
+  id                    Int      @id @default(autoincrement())
+  userId                Int      @map("user_id")
+  nftId                 Int?     @map("nft_id")
+  user                  User     @relation(fields: [userId], references: [id])
+  chainId               Int      @map("chain_id")
+  expiresAt             BigInt   @map("expires_at")
+  uniqueIdentityAddress String
+  sign                  String   @db.VarChar(500)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @default(now()) @updatedAt
+
+  @@unique([userId, chainId, uniqueIdentityAddress], name: "userId_chainId_uniqueIdentityAddress_unique")
+  @@map("user_nfts")
+}
+
+model TokenOfUser {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique @db.VarChar(255)
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("tokens")
+}
+

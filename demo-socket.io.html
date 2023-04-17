@@ -1,0 +1,39 @@
+<html>
+
+<head>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"
+    integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs"
+    crossorigin="anonymous"></script>
+  <script>
+    const socket = io('http://localhost:4156', {
+      extraHeaders: {
+        "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiYWRkcmVzcyI6IjB4MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMCIsImlhdCI6MTY3NjM3MTEzOCwiZXhwIjoxNjc2NDU3NTM4fQ.n6nDK1xpyNXyjaLMC2L4naCpngIdLjrDje--acNnOqE"
+      }
+    }
+    );
+    socket.on('connect', function () {
+      console.log('Connected', socket.connected);
+
+      socket.emit('joinRoom', 'dashboard', response =>
+        console.log('joinRooms:', response),
+      );
+    });
+    socket.on('events', function (data) {
+      console.log('event', data);
+      setTimeout(function () {
+        socket.emit('leaveRoom', 'dashboard');
+      }, 5000);
+
+    });
+    socket.on('exception', function (data) {
+      console.log('event', data);
+    });
+    socket.on('disconnect', function () {
+      console.log('Disconnected');
+    });
+  </script>
+</head>
+
+<body></body>
+
+</html>

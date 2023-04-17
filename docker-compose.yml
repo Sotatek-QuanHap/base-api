@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  databasemysql:
+    image: "mysql:8.0"
+    
+    container_name: databasemysql-helix
+    platform: linux/x86_64
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    ports:
+      - 3156:3306
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-helix
+    depends_on:
+      - databasemysql
+    environment:
+      PMA_HOST: databasemysql
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT}
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8156:80
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-helix
+    volumes:
+      - ./data/rabbitmq:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+
